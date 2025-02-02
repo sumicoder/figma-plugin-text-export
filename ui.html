@@ -1,0 +1,36 @@
+<h2>テキスト取得</h2>
+<button id="get" aria-label="テキストを取得する">取得する</button>
+<button id="cancel" aria-label="操作をキャンセルする">キャンセル</button>
+<textarea style="margin-block-start: 40px;width: 100%;" rows="2" readonly name="to-css" id="to-text" aria-label="テキストエリア"></textarea>
+<textarea style="margin-block-start: 16px;width: 100%;" rows="10" readonly name="to-css" id="to-css" aria-label="テキストエリア"></textarea>
+<script>
+
+	document.getElementById('get').onclick = () => {
+		parent.postMessage({ pluginMessage: { type: 'text-get' } }, '*')
+	}
+
+	document.getElementById('cancel').onclick = () => {
+		parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+	}
+
+	onmessage = (event) => {
+		if (event.data.pluginMessage.type === 'to-css') {
+			const cssData = event.data.pluginMessage.data;
+			document.getElementById('to-text').value = event.data.pluginMessage.text;
+			document.getElementById('to-css').value = cssData;
+		}
+		if (event.data.pluginMessage.type === 'download-csv') {
+			const csvData = event.data.pluginMessage.data;
+			const fileName = event.data.pluginMessage.fileName;
+			const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.setAttribute('download', fileName + '.csv'); // ダウンロードするファイル名
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url); // メモリを解放
+		}
+	};
+</script>
